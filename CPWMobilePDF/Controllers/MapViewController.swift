@@ -126,8 +126,8 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
     var screenPt:CGPoint = CGPoint(x: 0.0, y: 0.0) // the location of the move icon in screen coordinates (target icon)
     
     // more drop down menu
-    let moreMenuTransparentView = UIView();
-    let moreMenuTableview = UITableView();
+    let moreMenuTransparentView = UIView()
+    let moreMenuTableview = UITableView()
     var dataSource = ["Mark current location", "Add waypoint", "Add waypoint by lat/long", "Delete all waypoints", "APP SETTINGS:", "Show waypoints", "Load adjacent maps", "MAP SETTINGS:", "Lock in portrait mode", "Lock in landscape mode","Help"]
     let adjacentMapsMenuTransparentView = UIView()
     let adjacentMapsMenuTableview = UITableView()
@@ -135,6 +135,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
     var adjacentMapsMenuShowing:Bool = false
     var shouldLoadAdjacentMaps:Bool = true
     var showWaypoints:Bool = true
+    var shouldShowWaypoints:Bool = true // save in database
     var lockInPortrait:Bool = false
     var lockInLandscape:Bool = false
     var moreMenuShowing = false
@@ -369,7 +370,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
         moreMenuTransparentView.frame = window?.frame ?? self.view.frame
         self.view.addSubview(moreMenuTransparentView)
         // hide the menu so it can animate dropping down
-        self.moreMenuTableview.frame = CGRect(x: 0, y: 0, width: frames.width, height: 0)
+        self.moreMenuTableview.frame = CGRect(x: 0, y: self.topbarHeight, width: Int(frames.width), height: 0)
         self.view.addSubview(self.moreMenuTableview)
         self.moreMenuTableview.layer.cornerRadius = 5
         
@@ -381,7 +382,11 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
        
         UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 1.0, initialSpringVelocity: 1.0, options: .curveEaseInOut, animations: {
             self.moreMenuTransparentView.alpha = 0.5
-            self.moreMenuTableview.frame = CGRect(x: x, y: self.topbarHeight, width: Int(frames.width - CGFloat(x)), height: self.dataSource.count * self.mainMenuRowHeight) //Int(self.moreMenuTableview.rowHeight))
+            if ((self.dataSource.count * self.mainMenuRowHeight) < Int(frames.height) - self.topbarHeight){
+                self.moreMenuTableview.frame = CGRect(x: x, y: self.topbarHeight, width: Int(frames.width - CGFloat(x)), height: self.dataSource.count * self.mainMenuRowHeight)
+            }else {
+                self.moreMenuTableview.frame = CGRect(x: x, y: self.topbarHeight, width: Int(frames.width - CGFloat(x)), height: Int(frames.height) - self.topbarHeight)
+            }
         }, completion: nil)
         //self.moreMenuTableview.autoresizingMask = UIView.AutoresizingMask.flexibleHeight
         //self.moreMenuTableview.bounces = true
@@ -1610,6 +1615,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
                 do {
                     let myObject = (try NSKeyedUnarchiver.unarchivedObject(ofClass: AppSettings.self, from: archivedData as Data))
                     showWaypoints = myObject?.showWaypoints ?? true
+                    shouldShowWaypoints = myObject?.showWaypoints ?? true
                     shouldLoadAdjacentMaps = myObject?.loadAdjMaps ?? true
                  }
                  catch {
@@ -1627,6 +1633,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
                 do{
                     let myObject = try NSKeyedUnarchiver.unarchivedObject(ofClass: AppSettings.self, from: archivedData as Data)
                     showWaypoints = myObject?.showWaypoints ?? true
+                    shouldShowWaypoints = myObject?.showWaypoints ?? true
                     shouldLoadAdjacentMaps = myObject?.loadAdjMaps ?? true                }
                 catch {
                     print("Failed to read user preferences archive \(String(describing: error))")
@@ -1641,6 +1648,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
             if let archivedData = try? Data(contentsOf: AppSettings.ArchiveURL),
                let myObject = (try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(archivedData)) as? AppSettings {
                 showWaypoints = myObject.showWaypoints
+                shouldShowWaypoints = myObject.showWaypoints
                 shouldLoadAdjacentMaps = myObject.loadAdjMaps
             }
             else {
@@ -1649,7 +1657,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     private func saveSettings(){
-        let settings = AppSettings(showWaypoints: showWaypoints, loadAdjMaps: shouldLoadAdjacentMaps)
+        let settings = AppSettings(showWaypoints: shouldShowWaypoints, loadAdjMaps: shouldLoadAdjacentMaps)
 
         // Archive the maps array
         if #available (iOS 12.0,*){
@@ -2124,7 +2132,7 @@ extension MapViewController:UITableViewDelegate, UITableViewDataSource {
             cell.label.text = dataSource[indexPath.row]
             switch cell.label.text {
             case "Show waypoints":
-                cell.checkbox.isChecked = showWaypoints
+                cell.checkbox.isChecked = shouldShowWaypoints
                 cell.checkbox.isHidden = false
             case "Lock in portrait mode":
                 cell.checkbox.isChecked = lockInPortrait
@@ -2241,6 +2249,11 @@ extension MapViewController:UITableViewDelegate, UITableViewDataSource {
                 removeMoreMenuTransparentView()
             }
             else if (dataSource[indexPath.row] == "Show waypoints"){
+                if (shouldShowWaypoints == true){
+                    shouldShowWaypoints = false
+                }else {
+                    shouldShowWaypoints = true
+                }
                 showHideWayPts()
                 // hide any popup
                 hidePopup()
