@@ -92,6 +92,7 @@
 		A474D07D27876F5100F55D63 /* HelpMapListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpMapListViewController.swift; sourceTree = "<group>"; };
 		A474D07F2788C50E00F55D63 /* UIViewControllerPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewControllerPreview.swift; sourceTree = "<group>"; };
 		A475DBB1255DF42600B0B8DD /* WayPt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WayPt.swift; sourceTree = "<group>"; };
+		A49C9D742BC87121000E5862 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A4B3911B25FBCF8600730DED /* AppUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUtility.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -154,6 +155,7 @@
 				609CA8C22440C353006C0283 /* SceneDelegate.swift */,
 				609CA8C92440C355006C0283 /* Assets.xcassets */,
 				609CA8CE2440C355006C0283 /* Info.plist */,
+				A49C9D742BC87121000E5862 /* PrivacyInfo.xcprivacy */,
 			);
 			path = CPWMobilePDF;
 			sourceTree = "<group>";
